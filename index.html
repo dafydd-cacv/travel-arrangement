@@ -74,6 +74,26 @@
             background-color: rgba(0, 75, 136, 0.9); /* primary-dark 90% transparent */
             z-index: 50; /* Ensure it is on top of everything */
         }
+
+        /* Modal Toggle Button Styling */
+        .modal-select-item {
+            cursor: pointer;
+            transition: background-color 0.1s, color 0.1s;
+        }
+        .modal-select-item.selected {
+            background-color: #FCBB69 !important;
+            color: #004B88 !important;
+            border: 2px solid #004B88 !important;
+        }
+        
+        /* Custom shadows for soft gradient look */
+        /* Adjusted the box-shadow property to provide a soft blur (like a gradient) instead of a hard edge */
+        .shadow-highlight {
+            box-shadow: 0 4px 6px -1px rgba(252, 187, 105, 0.4), 0 2px 4px -2px rgba(252, 187, 105, 0.4); 
+        }
+        .shadow-blue {
+            box-shadow: 0 4px 6px -1px rgba(0, 75, 136, 0.4), 0 2px 4px -2px rgba(0, 75, 136, 0.4); /* Primary Dark (Blue) soft shadow */
+        }
     </style>
 </head>
 <body class="flex flex-col py-2">
@@ -149,10 +169,11 @@
                         Your travel arrangement 
                         <!-- Button Group: Reset and Analyse -->
                         <div class="flex space-x-2">
-                             <button id="reset-all-button" class="bg-tint-4 text-primary-dark text-sm px-3 py-1 hover:bg-tint-3 square-corner shadow-md transition flex items-center justify-center space-x-1">
+                             <button id="reset-all-button" class="bg-tint-4 text-primary-dark text-sm px-3 py-1 hover:bg-tint-3 square-corner shadow-blue transition flex items-center justify-center space-x-1">
                                 <span>↺</span><span>Reset all</span>
                             </button>
-                            <button id="analyse-button" class="bg-primary-dark text-white text-sm px-3 py-1 hover:bg-tint-1 square-corner flex items-center justify-center space-x-1">
+                            <!-- Updated Analyse button classes -->
+                            <button id="analyse-button" class="bg-primary-dark text-white text-sm px-3 py-1 hover:bg-highlight hover:text-primary-dark square-corner shadow-highlight transition flex items-center justify-center space-x-1">
                                 <span>🔍︎</span><span>Analyse</span>
                             </button>
                         </div>
@@ -189,23 +210,49 @@
         </div>
     </div>
     
-    <!-- 2. Booking Method Warning Modal -->
+    <!-- 2. Booking Method Warning Modal (Updated for multi-select) -->
     <div id="booking-method-modal" class="fixed inset-0 modal-backdrop hidden justify-center items-center z-50">
         <div class="w-11/12 md:w-3/5 lg:w-1/2 bg-white p-8 shadow-2xl square-corner border-t-8 border-highlight">
             <h2 class="text-2xl font-bold text-primary-dark mb-4">You must choose at least one booking method</h2>
-            <p class="text-lg text-primary-dark mb-6">Please select one of the booking methods below. Clicking the method will add it to your arrangement and run the analysis.</p>
+            <p class="text-lg text-primary-dark mb-6">Please select one or more booking methods below.</p>
             
             <div id="modal-booking-method-list" class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-80 overflow-y-auto pr-2">
                 <!-- Booking method options will be populated here -->
             </div>
 
-            <button id="method-modal-close-button" class="bg-primary-dark text-white text-lg px-6 py-2 hover:bg-tint-1 square-corner mt-6 float-right">
-                Close
-            </button>
+            <div class="flex justify-end space-x-4 mt-6">
+                <button id="method-modal-cancel-button" class="bg-tint-4 text-primary-dark text-lg px-6 py-2 hover:bg-tint-3 square-corner">
+                    Cancel
+                </button>
+                <button id="method-modal-add-button" class="bg-primary-dark text-white text-lg px-6 py-2 hover:bg-tint-1 square-corner" disabled>
+                    Add
+                </button>
+            </div>
         </div>
     </div>
     
-    <!-- 3. Intrinsic Check Modal (NEW) -->
+    <!-- 3. Holiday Element Warning Modal (NEW) -->
+    <div id="holiday-element-modal" class="fixed inset-0 modal-backdrop hidden justify-center items-center z-50">
+        <div class="w-11/12 md:w-3/5 lg:w-1/2 bg-white p-8 shadow-2xl square-corner border-t-8 border-highlight">
+            <h2 class="text-2xl font-bold text-primary-dark mb-4">You must choose at least one holiday element</h2>
+            <p class="text-lg text-primary-dark mb-6">Please select one or more holiday elements below.</p>
+            
+            <div id="modal-holiday-element-list" class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-80 overflow-y-auto pr-2">
+                <!-- Holiday element options will be populated here -->
+            </div>
+
+            <div class="flex justify-end space-x-4 mt-6">
+                <button id="element-modal-cancel-button" class="bg-tint-4 text-primary-dark text-lg px-6 py-2 hover:bg-tint-3 square-corner">
+                    Cancel
+                </button>
+                <button id="element-modal-add-button" class="bg-primary-dark text-white text-lg px-6 py-2 hover:bg-tint-1 square-corner" disabled>
+                    Add
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 4. Intrinsic Check Modal -->
     <div id="intrinsic-check-modal" class="fixed inset-0 modal-backdrop hidden justify-center items-center z-50">
         <div class="w-11/12 md:w-1/2 bg-white p-8 shadow-2xl square-corner border-t-8 border-highlight">
             <h2 class="text-2xl font-bold text-primary-dark mb-4">Intrinsic service check</h2>
@@ -226,8 +273,9 @@
     <script>
         const contractIcon = document.getElementById('contract-icon'); 
         const headerBar = document.getElementById('header-bar');
-        const dropZone = document.getElementById('drop-zone'); // TARGETING THE SINGLE DROP ZONE ELEMENT
+        const dropZone = document.getElementById('drop-zone'); 
         const bookingMethodsContainer = document.getElementById('booking-methods');
+        const holidayElementsContainer = document.getElementById('holiday-elements');
         const draggablesList = document.querySelectorAll('.draggable-item');
         const placeholder = document.getElementById('drop-zone-placeholder'); 
         const analyseButton = document.getElementById('analyse-button');
@@ -239,10 +287,15 @@
         const modalCloseButton = document.getElementById('modal-close-button');
 
         const bookingMethodModal = document.getElementById('booking-method-modal');
-        const methodModalCloseButton = document.getElementById('method-modal-close-button');
+        const methodModalCancelButton = document.getElementById('method-modal-cancel-button');
+        const methodModalAddButton = document.getElementById('method-modal-add-button');
         const modalBookingMethodList = document.getElementById('modal-booking-method-list');
         
-        // New Modal References
+        const holidayElementModal = document.getElementById('holiday-element-modal');
+        const elementModalCancelButton = document.getElementById('element-modal-cancel-button');
+        const elementModalAddButton = document.getElementById('element-modal-add-button');
+        const modalHolidayElementList = document.getElementById('modal-holiday-element-list');
+
         const intrinsicCheckModal = document.getElementById('intrinsic-check-modal');
         const intrinsicCheckYes = document.getElementById('intrinsic-check-yes');
         const intrinsicCheckNo = document.getElementById('intrinsic-check-no');
@@ -263,10 +316,6 @@
                 title: "Independent travel",
                 explanation: "This arrangement looks like it meets the criteria for Independent Travel. The arrangement was booked separately and independently, meaning it is not covered by the Package Travel Regulations (PTRs). Your [rights are limited to the terms and conditions of each individual provider] (e.g. flight, hotel)."
             },
-            'INCOMPLETE': {
-                title: "Incomplete arrangement",
-                explanation: "Please drop at least [two different types of Holiday Elements] and a [Booking Method] to analyse the arrangement. Example: Overnight stay (Accommodation) + Flights (Transport)."
-            }
         };
         
         // --- CORE ANALYSIS FUNCTIONS ---
@@ -285,20 +334,18 @@
 
             // SPECIAL STEP: If intrinsic, remove accommodation from the element list
             if (isAccommodationIntrinsic) {
-                // Find the first occurrence of accommodation and remove it.
                 const accIndex = holidayElements.indexOf('accommodation');
                 if (accIndex > -1) {
                     holidayElements.splice(accIndex, 1);
                 }
             }
             
-            // Re-check unique element count based on the potentially modified list
             const uniqueElements = new Set(holidayElements);
             const elementCount = uniqueElements.size;
+            const bookingMethodsCount = bookingMethods.length;
             
-            // 1. Initial Checks (Should always pass if called from analyseArrangement, but useful for logic integrity)
-            if (droppedItems.length === 0 || bookingMethods.length === 0 || elementCount < 2) {
-                // If the check made accommodation count as intrinsic, and now only 1 element remains, it defaults to IT.
+            // Re-check essential criteria after intrinsic removal
+            if (bookingMethodsCount === 0 || elementCount < 2) {
                 displayResult('IT'); 
                 return;
             }
@@ -336,7 +383,16 @@
                 return;
             }
             
-            // 2. Check for insufficient Holiday Elements (falls back to IT)
+            // 2. Check for missing Holiday Elements.
+            const holidayElementsCount = droppedItems
+                .filter(item => item.dataset.originalId.startsWith('element')).length;
+            
+            if (holidayElementsCount === 0) {
+                showHolidayElementWarning();
+                return;
+            }
+            
+            // 3. Check for element count for IT fallback / Intrinsic check
             const holidayElements = droppedItems
                 .filter(item => item.dataset.originalId.startsWith('element'))
                 .map(item => item.dataset.category);
@@ -349,12 +405,12 @@
                 return;
             }
 
-            // 3. SPECIAL CHECK: Is this the intrinsic transport/accommodation scenario?
+            // 4. SPECIAL CHECK: Is this the intrinsic transport/accommodation scenario?
             const includesAccommodation = uniqueElements.has('accommodation');
             const includesTransport = uniqueElements.has('transport');
             const isExactlyTwoElements = elementCount === 2;
 
-            // FIX: Intrinsic check should ONLY run if the two elements are specifically Accommodation AND Transport.
+            // Intrinsic check should ONLY run if the two elements are specifically Accommodation AND Transport.
             const needsIntrinsicCheck = isExactlyTwoElements && includesAccommodation && includesTransport;
 
             if (needsIntrinsicCheck) {
@@ -362,7 +418,7 @@
                 return;
             }
 
-            // 4. If no special check needed, run final analysis normally.
+            // 5. If no special check needed, run final analysis normally.
             runFinalAnalysis(false);
         }
 
@@ -395,6 +451,103 @@
             modal.classList.remove('flex');
         }
         
+        // --- Modal Select Toggling Helper ---
+        function toggleModalSelection(e) {
+            e.target.classList.toggle('selected');
+            
+            const modal = e.target.closest('.modal-backdrop');
+            let addButton;
+            if (modal.id === 'booking-method-modal') {
+                addButton = methodModalAddButton;
+            } else if (modal.id === 'holiday-element-modal') {
+                addButton = elementModalAddButton;
+            }
+
+            const selectedCount = modal.querySelectorAll('.modal-select-item.selected').length;
+            addButton.disabled = selectedCount === 0;
+            addButton.classList.toggle('opacity-50', selectedCount === 0);
+        }
+
+        // --- Booking Method Warning Modal Logic (Multi-select) ---
+
+        function showBookingMethodWarning() {
+            modalBookingMethodList.innerHTML = '';
+            methodModalAddButton.disabled = true;
+            methodModalAddButton.classList.add('opacity-50');
+
+            // Get all unique booking methods from the source list
+            const sourceMethods = Array.from(bookingMethodsContainer.querySelectorAll('[data-type]')).filter(item => item.getAttribute('draggable') === 'true');
+
+            sourceMethods.forEach(method => {
+                const methodButton = document.createElement('button');
+                methodButton.className = 'w-full p-3 text-left bg-tint-4 text-primary-dark font-semibold shadow-md square-corner transition modal-select-item border-2 border-tint-4 hover:bg-tint-3';
+                methodButton.innerHTML = method.innerHTML;
+                methodButton.dataset.originalId = method.id;
+
+                methodButton.addEventListener('click', toggleModalSelection);
+
+                modalBookingMethodList.appendChild(methodButton);
+            });
+
+            bookingMethodModal.classList.remove('hidden');
+            bookingMethodModal.classList.add('flex');
+        }
+        
+        methodModalAddButton.addEventListener('click', () => {
+            const selectedMethods = Array.from(modalBookingMethodList.querySelectorAll('.modal-select-item.selected'));
+            
+            selectedMethods.forEach(button => {
+                simulateDrop(button.dataset.originalId);
+            });
+            
+            hideModal(bookingMethodModal);
+            analyseArrangement(); 
+        });
+
+        methodModalCancelButton.addEventListener('click', () => {
+            hideModal(bookingMethodModal);
+        });
+
+        // --- Holiday Element Warning Modal Logic (Multi-select) ---
+        
+        function showHolidayElementWarning() {
+            modalHolidayElementList.innerHTML = '';
+            elementModalAddButton.disabled = true;
+            elementModalAddButton.classList.add('opacity-50');
+
+            // Get all unique holiday elements from the source list
+            const sourceElements = Array.from(holidayElementsContainer.querySelectorAll('[data-category]')).filter(item => item.getAttribute('draggable') === 'true');
+
+            sourceElements.forEach(element => {
+                const elementButton = document.createElement('button');
+                elementButton.className = 'w-full p-3 text-left bg-tint-4 text-primary-dark font-semibold shadow-md square-corner transition modal-select-item border-2 border-tint-4 hover:bg-tint-3';
+                elementButton.innerHTML = element.innerHTML;
+                elementButton.dataset.originalId = element.id;
+
+                elementButton.addEventListener('click', toggleModalSelection);
+
+                modalHolidayElementList.appendChild(elementButton);
+            });
+
+            holidayElementModal.classList.remove('hidden');
+            holidayElementModal.classList.add('flex');
+        }
+        
+        elementModalAddButton.addEventListener('click', () => {
+            const selectedElements = Array.from(modalHolidayElementList.querySelectorAll('.modal-select-item.selected'));
+            
+            selectedElements.forEach(button => {
+                simulateDrop(button.dataset.originalId);
+            });
+            
+            hideModal(holidayElementModal);
+            analyseArrangement(); 
+        });
+
+        elementModalCancelButton.addEventListener('click', () => {
+            hideModal(holidayElementModal);
+        });
+
         // --- Intrinsic Check Modal Logic ---
         function showIntrinsicCheck() {
             // Apply highlighting to the intrinsic check text
@@ -407,33 +560,7 @@
             intrinsicCheckModal.classList.add('flex');
         }
         
-        // --- Booking Method Warning Modal Logic ---
-
-        function showBookingMethodWarning() {
-            modalBookingMethodList.innerHTML = '';
-            
-            // Get all unique booking methods from the source list
-            const sourceMethods = Array.from(bookingMethodsContainer.querySelectorAll('[data-type]')).filter(item => item.getAttribute('draggable') === 'true');
-
-            sourceMethods.forEach(method => {
-                const methodButton = document.createElement('button');
-                methodButton.className = 'w-full p-3 text-left bg-tint-4 text-primary-dark font-semibold shadow-md square-corner transition hover:bg-highlight hover:text-white';
-                methodButton.innerHTML = method.innerHTML;
-
-                methodButton.onclick = () => {
-                    // Simulate a drop action with this item
-                    simulateDrop(method.id);
-                    hideModal(bookingMethodModal);
-                    // Run analysis immediately after adding the method
-                    analyseArrangement(); 
-                };
-
-                modalBookingMethodList.appendChild(methodButton);
-            });
-
-            bookingMethodModal.classList.remove('hidden');
-            bookingMethodModal.classList.add('flex');
-        }
+        // --- Drag and Drop Simulation Helper ---
 
         function simulateDrop(originalId) {
             const draggedElement = document.getElementById(originalId);
@@ -443,11 +570,12 @@
                 placeholder.classList.add('hidden'); 
             }
 
+            // 1. Disable Source Item
             disableSourceItem(originalId);
             
+            // 2. Clone and Style Dropped Item
             const droppedClone = draggedElement.cloneNode(true);
             
-            // Apply drop zone specific styling (Ensuring visibility)
             droppedClone.classList.remove('shadow-sm', 'clicked', 'opacity-50', 'shadow-2xl');
             droppedClone.classList.add('flex', 'justify-between', 'items-center', 'shadow-md', 'w-full', 'p-2'); 
             
@@ -466,7 +594,7 @@
             droppedClone.id = originalId + '_dropped_' + Date.now(); 
             droppedClone.dataset.originalId = originalId; 
             
-            // Add Remove icon (↺)
+            // 3. Add Remove icon (↺)
             const removeButton = document.createElement('span');
             removeButton.textContent = ' ↺';
             removeButton.className = 'text-primary-dark font-bold ml-4 cursor-pointer hover:text-tint-1 flex-shrink-0'; 
@@ -486,8 +614,8 @@
             droppedClone.appendChild(contentSpan);
             droppedClone.appendChild(removeButton);
 
-            dropZone.appendChild(droppedClone); // Appending to the main drop zone div
-            hideModal(resultModal); // Ensure result modal is closed
+            dropZone.appendChild(droppedClone); 
+            hideModal(resultModal); 
         }
 
 
@@ -534,7 +662,7 @@
             });
         }
         
-        // --- Helper Functions for Item State (Retaining approved grey-out logic) ---
+        // --- Helper Functions for Item State (Greying out/Re-enabling) ---
         
         function disableSourceItem(itemId) {
             const item = document.getElementById(itemId);
@@ -558,24 +686,20 @@
         }
         
         function resetAll() {
-            // 1. Get all dropped items (excluding placeholder)
             const droppedItems = Array.from(dropZone.querySelectorAll('[data-original-id]'));
-
-            // 2. Iterate and re-enable source items
             droppedItems.forEach(item => {
                 enableSourceItem(item.dataset.originalId);
                 item.parentNode.removeChild(item);
             });
 
-            // 3. Show placeholder
             if (placeholder) {
                 placeholder.classList.remove('hidden');
             }
 
-            // 4. Hide any open modals
             hideModal(resultModal);
             hideModal(bookingMethodModal);
             hideModal(intrinsicCheckModal);
+            hideModal(holidayElementModal);
         }
 
         // --- Drag and Drop Logic ---
@@ -621,7 +745,6 @@
 
         // Drop Handler - Applies Disabling/Enabling Logic
         function isDropZoneEmpty() {
-            // Check children of the scrollable drop zone, excluding the placeholder
             return Array.from(dropZone.children).filter(c => c.id !== 'drop-zone-placeholder').length === 0;
         }
 
@@ -645,35 +768,7 @@
 
         // Modal Close Listeners
         modalCloseButton.addEventListener('click', () => hideModal(resultModal));
-        methodModalCloseButton.addEventListener('click', () => hideModal(bookingMethodModal));
         
-        // Intrinsic Check Modal Listeners
-        intrinsicCheckYes.addEventListener('click', () => {
-            hideModal(intrinsicCheckModal);
-            runFinalAnalysis(true); // Treat accommodation as intrinsic (ignore it)
-        });
-        intrinsicCheckNo.addEventListener('click', () => {
-            hideModal(intrinsicCheckModal);
-            runFinalAnalysis(false); // Treat accommodation as normal
-        });
-        
-        // Close modals if user clicks the dark backdrop
-        resultModal.addEventListener('click', (e) => {
-            if (e.target === resultModal) {
-                hideModal(resultModal);
-            }
-        });
-        bookingMethodModal.addEventListener('click', (e) => {
-            if (e.target === bookingMethodModal) {
-                hideModal(bookingMethodModal);
-            }
-        });
-        intrinsicCheckModal.addEventListener('click', (e) => {
-             if (e.target === intrinsicCheckModal) {
-                hideModal(intrinsicCheckModal);
-            }
-        });
-
         // Initialize the icon interaction
         document.addEventListener('DOMContentLoaded', () => {
             setupIconInteraction();
