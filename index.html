@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Travel Arrangement Identifier</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Load Open Sans Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&display=swap" rel="stylesheet">
+    
+    <script>
+        // Tailwind Configuration with custom colors and font
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Open Sans', 'sans-serif'],
+                    },
+                    colors: {
+                        'primary-dark': '#004B88',
+                        'tint-1': '#2E639A',
+                        'tint-2': '#6481B2',
+                        'tint-3': '#96A7CB',
+                        'tint-4': '#C9D1E5',
+                        'tint-5': '#EAEDF5',
+                        'highlight': '#FCBB69',
+                    },
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Custom styles for branding consistency */
+        body {
+            background-color: #EAEDF5; 
+        }
+        .square-corner {
+            border-radius: 0 !important;
+        }
+        .draggable-item {
+            cursor: grab;
+            transition: transform 0.1s, box-shadow 0.1s, background-color 0.1s;
+            font-size: 0.875rem; /* text-sm equivalent */
+        }
+        .draggable-item:active {
+            cursor: grabbing;
+        }
+
+        /* Hover and Click State Styling */
+        .draggable-item:hover, .draggable-item.clicked {
+            background-color: rgba(252, 187, 105, 0.5) !important; /* 50% opacity of #FCBB69 */
+            border-color: #FCBB69 !important;
+            box-shadow: 0 0 0 2px #FCBB69;
+        }
+
+        /* Drop Zone container is the border/boundary */
+        .drop-zone {
+            transition: background-color 0.1s;
+        }
+        
+        /* Repulsion Icon Styles */
+        .magnify-icon {
+            font-size: 3.5rem;
+            display: inline-block;
+            color: #FCBB69;
+            transition: transform 0.1s ease-out; 
+            cursor: default !important;
+        }
+
+        /* Modal specific styles */
+        .modal-backdrop {
+            background-color: rgba(0, 75, 136, 0.9); /* primary-dark 90% transparent */
+            z-index: 50; /* Ensure it is on top of everything */
+        }
+    </style>
+</head>
+<body class="flex flex-col py-2">
+
+    <!-- Header Section -->
+    <header id="header-bar" class="w-full max-w-5xl mx-auto bg-primary-dark p-6 md:p-8 mb-4 shadow-2xl square-corner flex-shrink-0 relative z-10">
+        <div class="flex justify-between items-center">
+            <!-- Left Aligned Text -->
+            <div class="text-left">
+                <h1 class="text-3xl md:text-4xl font-bold text-white leading-tight">
+                    Travel arrangement identifer
+                </h1>
+                <p class="mt-2 text-base text-tint-4">Use this tool to identify what sort of holiday contract has been formed: a package holiday, linked travel arrangement, or independent travel</p>
+            </div>
+            <!-- Right Aligned Interactive Icon: Plane escaping the rain -->
+            <div class="hidden sm:block">
+                <span id="contract-icon" class="magnify-icon">✈️</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <div class="px-4 flex items-start justify-center pb-8">
+        <!-- Main Application Container -->
+        <div class="w-full max-w-5xl bg-white border-4 border-primary-dark shadow-2xl square-corner flex flex-col">
+
+            <!-- Main Content Grid -->
+            <div class="flex flex-col lg:flex-row divide-y-4 lg:divide-x-4 lg:divide-y-0 divide-primary-dark">
+                
+                <!-- Left Source Area: Booking Method & Holiday Elements -->
+                <div class="lg:w-1/2 flex flex-col md:flex-row divide-x-0 md:divide-x-4 divide-primary-dark">
+                    
+                    <!-- Column 1: Booking Method -->
+                    <div class="w-full md:w-1/2 p-4 bg-tint-5 flex flex-col">
+                        <h2 class="text-xl font-bold text-primary-dark mb-4 border-b border-tint-3 pb-2 flex-shrink-0">Booking method</h2>
+                        <div id="booking-methods" class="space-y-2 overflow-y-auto pr-2 h-[30rem]">
+                            <!-- Draggable Items -->
+                            <div draggable="true" id="method-1" class="draggable-item p-2 bg-white text-primary-dark border border-tint-3 shadow-sm square-corner" data-type="package">🗂️ Pre-arranged into a single contract</div>
+                            <div draggable="true" id="method-2" class="draggable-item p-2 bg-white text-primary-dark border border-tint-3 shadow-sm square-corner" data-type="package">🛒 Purchased from a single point of sale</div>
+                            <div draggable="true" id="method-3" class="draggable-item p-2 bg-white text-primary-dark border border-tint-3 shadow-sm square-corner" data-type="package">💰 Offered at an inclusive or total price</div>
+                            <div draggable="true" id="method-4" class="draggable-item p-2 bg-white text-primary-dark border border-tint-3 shadow-sm square-corner" data-type="package">📣 Advertised as a package</div>
+                            <div draggable="true" id="method-5" class="draggable-item p-2 bg-white text-primary-dark border border-tint-3 shadow-sm square-corner" data-type="package">🤝 Offered as a combination by a trader after the contract was concluded</div>
+                            <div draggable="true" id="method-6" class="draggable-item p-2 bg-white text-primary-dark border border-tint-3 shadow-sm square-corner" data-type="lta">🖱️ Bought via a click-through process within 24 hours of booking, where the trader passed on the consumer's details</div>
+                            <div draggable="true" id="method-7" class="draggable-item p-2 bg-white text-primary-dark border border-tint-3 shadow-sm square-corner" data-type="lta">🔗 Facilitated separate contracts</div>
+                            <div draggable="true" id="method-8" class="draggable-item p-2 bg-white text-primary-dark border border-tint-3 shadow-sm square-corner" data-type="lta">➡️ Directed links, where the trader did not pass on the consumer's details</div>
+                            <div draggable="true" id="method-9" class="draggable-item p-2 bg-white text-primary-dark border border-tint-3 shadow-sm square-corner" data-type="independent">🚶 Independently booked</div>
+                        </div>
+                    </div>
+
+                    <!-- Column 2: Holiday Elements -->
+                    <div class="w-full md:w-1/2 p-4 bg-tint-5 border-t-4 md:border-t-0 border-primary-dark flex flex-col">
+                        <h2 class="text-xl font-bold text-primary-dark mb-4 border-b border-tint-3 pb-2 flex-shrink-0">Holiday elements</h2>
+                        <div id="holiday-elements" class="space-y-2 overflow-y-auto pr-2 h-[30rem]">
+                            <!-- Draggable Items - Grouped by Category -->
+                            <div draggable="true" id="element-1" class="draggable-item p-2 bg-white text-primary-dark border border-tint-3 shadow-sm square-corner" data-category="transport">🛫 Flights</div>
+                            <div draggable="true" id="element-2" class="draggable-item p-2 bg-white text-primary-dark border border-tint-3 shadow-sm square-corner" data-category="transport">🚆 Trains</div>
+                            <div draggable="true" id="element-3" class="draggable-item p-2 bg-white text-primary-dark border border-tint-3 shadow-sm square-corner" data-category="transport">🚌 Coaches</div>
+                            <div draggable="true" id="element-4" class="draggable-item p-2 bg-white text-primary-dark border border-tint-3 shadow-sm square-corner" data-category="transport">🚢 Ferries</div>
+                            <div draggable="true" id="element-5" class="draggable-item p-2 bg-white text-primary-dark border border-tint-3 shadow-sm square-corner" data-category="accommodation">🛏️ Overnight stay</div>
+                            <div draggable="true" id="element-6" class="draggable-item p-2 bg-white text-primary-dark border border-tint-3 shadow-sm square-corner" data-category="vehicle">🚗 Vehicle hire</div>
+                            <div draggable="true" id="element-7" class="draggable-item p-2 bg-white text-primary-dark border border-tint-3 shadow-sm square-corner" data-category="tourist">🚶‍♀️ Guided tour</div>
+                            <div draggable="true" id="element-8" class="draggable-item p-2 bg-white text-primary-dark border border-tint-3 shadow-sm square-corner" data-category="tourist">🧗‍♀️ Activity sports</div>
+                            <div draggable="true" id="element-9" class="draggable-item p-2 bg-white text-primary-dark border border-tint-3 shadow-sm square-corner" data-category="tourist">🏛️ Museum entry</div>
+                            <div draggable="true" id="element-10" class="draggable-item p-2 bg-white text-primary-dark border border-tint-3 shadow-sm square-corner" data-category="tourist">🎟️ Event tickets</div>
+                            <div draggable="true" id="element-11" class="draggable-item p-2 bg-white text-primary-dark border border-tint-3 shadow-sm square-corner" data-category="tourist">🎡 Other tourist activities</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Target Area: Drop Zone -->
+                <div class="lg:w-1/2 p-4 bg-tint-5 flex flex-col">
+                    <h2 class="text-xl font-bold text-primary-dark mb-4 border-b border-highlight pb-2 flex justify-between items-center flex-shrink-0">
+                        Your travel arrangement 
+                        <!-- Button Group: Reset and Analyse -->
+                        <div class="flex space-x-2">
+                             <button id="reset-all-button" class="bg-tint-4 text-primary-dark text-sm px-3 py-1 hover:bg-tint-3 square-corner shadow-md transition flex items-center justify-center space-x-1">
+                                <span>↺</span><span>Reset all</span>
+                            </button>
+                            <button id="analyse-button" class="bg-primary-dark text-white text-sm px-3 py-1 hover:bg-tint-1 square-corner flex items-center justify-center space-x-1">
+                                <span>🔍︎</span><span>Analyse</span>
+                            </button>
+                        </div>
+                    </h2>
+                    <!-- Drop Zone container - This is the single scrollable element now -->
+                    <div id="drop-zone" class="drop-zone min-h-32 p-4 border-4 border-dashed border-tint-3 text-center text-tint-1 text-lg flex flex-col space-y-2 overflow-y-auto h-[30rem]">
+                        <p id="drop-zone-placeholder" class="py-12">drag booking method(s) and holiday element(s) from the left and drop them here</p>
+                        <!-- Dropped items will appear here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Footer Attribution -->
+    <footer class="w-full max-w-5xl mx-auto p-4 text-tint-1 flex justify-between items-center text-xs flex-shrink-0">
+        <!-- Logo (Left-aligned, size h-12) -->
+        <img src="https://cacv.org.uk/wp-content/uploads/cacv-logo.svg" alt="Citizens Advice Cardiff & Vale Logo" class="h-12">
+        
+        <!-- Text (Right-aligned) -->
+        <p class="text-right">This tool was created by <a href="mailto:dafydd.young@consumer.advice.org.uk" class="text-primary-dark font-semibold hover:text-tint-1">Dafydd</a> at Citizens Advice Cardiff & Vale. Use at your own risk, and if in doubt check <a href="https://docs.google.com/presentation/d/1bLMtEq_Hko38_jHlyuPTbBpIPPi8OoctlGwqs8_0pkU/edit?usp=sharing" target="_blank" class="text-primary-dark font-semibold hover:text-tint-1">the PTRs slideshow</a>.</p>
+    </footer>
+
+    <!-- MODAL STRUCTURES -->
+
+    <!-- 1. Analysis Result Modal -->
+    <div id="result-modal" class="fixed inset-0 modal-backdrop hidden justify-center items-center">
+        <div id="modal-content-area" class="w-11/12 md:w-1/2 bg-white p-8 shadow-2xl square-corner border-t-8 border-highlight">
+            <h2 id="modal-title" class="text-3xl font-bold text-primary-dark mb-4"></h2>
+            <p id="modal-explanation" class="text-lg text-primary-dark mb-6"></p>
+            <button id="modal-close-button" class="bg-primary-dark text-white text-lg px-6 py-2 hover:bg-tint-1 square-corner float-right">
+                Close
+            </button>
+        </div>
+    </div>
+    
+    <!-- 2. Booking Method Warning Modal -->
+    <div id="booking-method-modal" class="fixed inset-0 modal-backdrop hidden justify-center items-center z-50">
+        <div class="w-11/12 md:w-3/5 lg:w-1/2 bg-white p-8 shadow-2xl square-corner border-t-8 border-highlight">
+            <h2 class="text-2xl font-bold text-primary-dark mb-4">You must choose at least one booking method</h2>
+            <p class="text-lg text-primary-dark mb-6">Please select one of the booking methods below. Clicking the method will add it to your arrangement and run the analysis.</p>
+            
+            <div id="modal-booking-method-list" class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-80 overflow-y-auto pr-2">
+                <!-- Booking method options will be populated here -->
+            </div>
+
+            <button id="method-modal-close-button" class="bg-primary-dark text-white text-lg px-6 py-2 hover:bg-tint-1 square-corner mt-6 float-right">
+                Close
+            </button>
+        </div>
+    </div>
+    
+    <!-- 3. Intrinsic Check Modal (NEW) -->
+    <div id="intrinsic-check-modal" class="fixed inset-0 modal-backdrop hidden justify-center items-center z-50">
+        <div class="w-11/12 md:w-1/2 bg-white p-8 shadow-2xl square-corner border-t-8 border-highlight">
+            <h2 class="text-2xl font-bold text-primary-dark mb-4">Intrinsic service check</h2>
+            <p class="text-lg text-primary-dark mb-6">You have selected two holiday elements, one of which is an 'Overnight stay'. Was the overnight stay an [intrinsic part of transport] (e.g., a sleeper train cabin, cruise cabin, or flight layover accommodation included with the ticket)?</p>
+            
+            <div class="flex justify-end space-x-4">
+                <button id="intrinsic-check-yes" class="bg-tint-1 text-white text-lg px-6 py-2 hover:bg-tint-2 square-corner">
+                    Yes (It was intrinsic)
+                </button>
+                <button id="intrinsic-check-no" class="bg-primary-dark text-white text-lg px-6 py-2 hover:bg-tint-1 square-corner">
+                    No (It was separate accommodation)
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        const contractIcon = document.getElementById('contract-icon'); 
+        const headerBar = document.getElementById('header-bar');
+        const dropZone = document.getElementById('drop-zone'); // TARGETING THE SINGLE DROP ZONE ELEMENT
+        const bookingMethodsContainer = document.getElementById('booking-methods');
+        const draggablesList = document.querySelectorAll('.draggable-item');
+        const placeholder = document.getElementById('drop-zone-placeholder'); 
+        const analyseButton = document.getElementById('analyse-button');
+        
+        // Modal Element References
+        const resultModal = document.getElementById('result-modal');
+        const modalTitle = document.getElementById('modal-title');
+        const modalExplanation = document.getElementById('modal-explanation');
+        const modalCloseButton = document.getElementById('modal-close-button');
+
+        const bookingMethodModal = document.getElementById('booking-method-modal');
+        const methodModalCloseButton = document.getElementById('method-modal-close-button');
+        const modalBookingMethodList = document.getElementById('modal-booking-method-list');
+        
+        // New Modal References
+        const intrinsicCheckModal = document.getElementById('intrinsic-check-modal');
+        const intrinsicCheckYes = document.getElementById('intrinsic-check-yes');
+        const intrinsicCheckNo = document.getElementById('intrinsic-check-no');
+
+        const resetAllButton = document.getElementById('reset-all-button'); 
+
+        // --- Result Definitions ---
+        const ARRANGEMENT_DEFINITIONS = {
+            'PH': {
+                title: "Package holiday",
+                explanation: "This arrangement looks like it meets the criteria for a Package Holiday under the PTRs. This usually means [you have strong protections], including the right to transfer your booking, specific cancellation rights, and the right to redress if services are not supplied as agreed."
+            },
+            'LTA': {
+                title: "Linked travel arrangement",
+                explanation: "This arrangement looks like it meets the criteria for a Linked Travel Arrangement (LTA) under the PTRs. You have [some protections], particularly regarding insolvency protection for the services that were facilitated, but generally fewer rights than a Package Holiday."
+            },
+            'IT': {
+                title: "Independent travel",
+                explanation: "This arrangement looks like it meets the criteria for Independent Travel. The arrangement was booked separately and independently, meaning it is not covered by the Package Travel Regulations (PTRs). Your [rights are limited to the terms and conditions of each individual provider] (e.g. flight, hotel)."
+            },
+            'INCOMPLETE': {
+                title: "Incomplete arrangement",
+                explanation: "Please drop at least [two different types of Holiday Elements] and a [Booking Method] to analyse the arrangement. Example: Overnight stay (Accommodation) + Flights (Transport)."
+            }
+        };
+        
+        // --- CORE ANALYSIS FUNCTIONS ---
+
+        function runFinalAnalysis(isAccommodationIntrinsic = false) {
+            const droppedItems = Array.from(dropZone.querySelectorAll('[data-original-id]'));
+            
+            // Group dropped items
+            const bookingMethods = droppedItems
+                .filter(item => item.dataset.originalId.startsWith('method'))
+                .map(item => item.dataset.type);
+
+            let holidayElements = droppedItems
+                .filter(item => item.dataset.originalId.startsWith('element'))
+                .map(item => item.dataset.category);
+
+            // SPECIAL STEP: If intrinsic, remove accommodation from the element list
+            if (isAccommodationIntrinsic) {
+                // Find the first occurrence of accommodation and remove it.
+                const accIndex = holidayElements.indexOf('accommodation');
+                if (accIndex > -1) {
+                    holidayElements.splice(accIndex, 1);
+                }
+            }
+            
+            // Re-check unique element count based on the potentially modified list
+            const uniqueElements = new Set(holidayElements);
+            const elementCount = uniqueElements.size;
+            
+            // 1. Initial Checks (Should always pass if called from analyseArrangement, but useful for logic integrity)
+            if (droppedItems.length === 0 || bookingMethods.length === 0 || elementCount < 2) {
+                // If the check made accommodation count as intrinsic, and now only 1 element remains, it defaults to IT.
+                displayResult('IT'); 
+                return;
+            }
+            
+            // 2. Check for Package Holiday (PH) Markers
+            const isPackageBooking = bookingMethods.some(type => type === 'package');
+            
+            if (isPackageBooking) {
+                displayResult('PH');
+                return;
+            }
+
+            // 3. Check for Linked Travel Arrangement (LTA) Markers
+            const isLTABooking = bookingMethods.some(type => type === 'lta');
+
+            if (isLTABooking) {
+                displayResult('LTA');
+                return;
+            }
+
+            // 4. Fallback to Independent Travel (IT)
+            displayResult('IT');
+        }
+
+        // Main Analysis Entry Point
+        function analyseArrangement() {
+            const droppedItems = Array.from(dropZone.querySelectorAll('[data-original-id]'));
+            
+            // 1. Check for missing Booking Method.
+            const bookingMethodsCount = droppedItems
+                .filter(item => item.dataset.originalId.startsWith('method')).length;
+            
+            if (bookingMethodsCount === 0) {
+                showBookingMethodWarning();
+                return;
+            }
+            
+            // 2. Check for insufficient Holiday Elements (falls back to IT)
+            const holidayElements = droppedItems
+                .filter(item => item.dataset.originalId.startsWith('element'))
+                .map(item => item.dataset.category);
+            
+            const uniqueElements = new Set(holidayElements);
+            const elementCount = uniqueElements.size;
+
+            if (elementCount < 2) {
+                displayResult('IT');
+                return;
+            }
+
+            // 3. SPECIAL CHECK: Is this the intrinsic transport/accommodation scenario?
+            const includesAccommodation = uniqueElements.has('accommodation');
+            const includesTransport = uniqueElements.has('transport');
+            const isExactlyTwoElements = elementCount === 2;
+
+            // FIX: Intrinsic check should ONLY run if the two elements are specifically Accommodation AND Transport.
+            const needsIntrinsicCheck = isExactlyTwoElements && includesAccommodation && includesTransport;
+
+            if (needsIntrinsicCheck) {
+                showIntrinsicCheck();
+                return;
+            }
+
+            // 4. If no special check needed, run final analysis normally.
+            runFinalAnalysis(false);
+        }
+
+        // --- MODAL & UI MANAGEMENT FUNCTIONS ---
+
+        function processTextForMarkup(text) {
+            if (!text) return '';
+            // Replaces [text] with <span style="...highlight-style">text</span>
+            return text.replace(/\[([^\]]+)\]/g, (match, content) => {
+                // Apply 50% transparent yellow highlight
+                return `<span style="background-color: rgba(252, 187, 105, 0.5); padding: 0 0.25rem; line-height: 1.5; display: inline;">${content}</span>`;
+            });
+        }
+
+        function displayResult(typeKey) {
+            const definition = ARRANGEMENT_DEFINITIONS[typeKey]; 
+            if (!definition) {
+                return;
+            }
+            
+            modalTitle.textContent = definition.title;
+            modalExplanation.innerHTML = processTextForMarkup(definition.explanation);
+            
+            resultModal.classList.remove('hidden');
+            resultModal.classList.add('flex');
+        }
+
+        function hideModal(modal) {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+        
+        // --- Intrinsic Check Modal Logic ---
+        function showIntrinsicCheck() {
+            // Apply highlighting to the intrinsic check text
+            const modalBody = intrinsicCheckModal.querySelector('p');
+            // Re-fetch original text to prevent double-processing of markup
+            modalBody.textContent = "You have selected two holiday elements, one of which is an 'Overnight stay'. Was the overnight stay an [intrinsic part of transport] (e.g., a sleeper train cabin, cruise cabin, or flight layover accommodation included with the ticket)?";
+            modalBody.innerHTML = processTextForMarkup(modalBody.textContent);
+            
+            intrinsicCheckModal.classList.remove('hidden');
+            intrinsicCheckModal.classList.add('flex');
+        }
+        
+        // --- Booking Method Warning Modal Logic ---
+
+        function showBookingMethodWarning() {
+            modalBookingMethodList.innerHTML = '';
+            
+            // Get all unique booking methods from the source list
+            const sourceMethods = Array.from(bookingMethodsContainer.querySelectorAll('[data-type]')).filter(item => item.getAttribute('draggable') === 'true');
+
+            sourceMethods.forEach(method => {
+                const methodButton = document.createElement('button');
+                methodButton.className = 'w-full p-3 text-left bg-tint-4 text-primary-dark font-semibold shadow-md square-corner transition hover:bg-highlight hover:text-white';
+                methodButton.innerHTML = method.innerHTML;
+
+                methodButton.onclick = () => {
+                    // Simulate a drop action with this item
+                    simulateDrop(method.id);
+                    hideModal(bookingMethodModal);
+                    // Run analysis immediately after adding the method
+                    analyseArrangement(); 
+                };
+
+                modalBookingMethodList.appendChild(methodButton);
+            });
+
+            bookingMethodModal.classList.remove('hidden');
+            bookingMethodModal.classList.add('flex');
+        }
+
+        function simulateDrop(originalId) {
+            const draggedElement = document.getElementById(originalId);
+            if (!draggedElement) return;
+
+            if (placeholder) {
+                placeholder.classList.add('hidden'); 
+            }
+
+            disableSourceItem(originalId);
+            
+            const droppedClone = draggedElement.cloneNode(true);
+            
+            // Apply drop zone specific styling (Ensuring visibility)
+            droppedClone.classList.remove('shadow-sm', 'clicked', 'opacity-50', 'shadow-2xl');
+            droppedClone.classList.add('flex', 'justify-between', 'items-center', 'shadow-md', 'w-full', 'p-2'); 
+            
+            droppedClone.style.backgroundColor = 'rgba(252, 187, 105, 0.5)';
+            droppedClone.classList.remove('bg-tint-5', 'bg-white', 'text-tint-3');
+            droppedClone.classList.add('text-primary-dark', 'border-primary-dark', 'border'); 
+            
+            for (const attr of draggedElement.attributes) {
+                if (attr.name.startsWith('data-')) {
+                    droppedClone.setAttribute(attr.name, attr.value);
+                }
+            }
+
+            droppedClone.removeAttribute('draggable');
+            droppedClone.style.cursor = 'default';
+            droppedClone.id = originalId + '_dropped_' + Date.now(); 
+            droppedClone.dataset.originalId = originalId; 
+            
+            // Add Remove icon (↺)
+            const removeButton = document.createElement('span');
+            removeButton.textContent = ' ↺';
+            removeButton.className = 'text-primary-dark font-bold ml-4 cursor-pointer hover:text-tint-1 flex-shrink-0'; 
+            
+            removeButton.onclick = () => {
+                enableSourceItem(droppedClone.dataset.originalId);
+                droppedClone.parentNode.removeChild(droppedClone);
+
+                if (isDropZoneEmpty()) {
+                    if (placeholder) placeholder.classList.remove('hidden');
+                }
+            };
+            
+            const contentSpan = document.createElement('span');
+            contentSpan.innerHTML = droppedClone.innerHTML; 
+            droppedClone.innerHTML = '';
+            droppedClone.appendChild(contentSpan);
+            droppedClone.appendChild(removeButton);
+
+            dropZone.appendChild(droppedClone); // Appending to the main drop zone div
+            hideModal(resultModal); // Ensure result modal is closed
+        }
+
+
+        // --- Custom Repulsion Icon Logic (Plane escaping the rain) ---
+
+        const REPULSION_RADIUS = 120; 
+        const REPULSION_STRENGTH = 1.5; 
+
+        function setupIconInteraction() {
+            if (!contractIcon || !headerBar) return;
+            
+            const cursorUrl = `url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"><text x="0" y="35" font-size="35" fill="%23FCBB69" stroke="%23FCBB69" stroke-width="0.5">🌧️</text></svg>') 20 20, zoom-in`;
+            headerBar.style.cursor = cursorUrl;
+
+            headerBar.addEventListener('mousemove', (e) => {
+                const iconRect = contractIcon.getBoundingClientRect();
+                
+                const iconCenterX = iconRect.left + iconRect.width / 2;
+                const iconCenterY = iconRect.top + iconRect.height / 2;
+
+                const dx = iconCenterX - e.clientX;
+                const dy = iconCenterY - e.clientY;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+
+                if (dist < REPULSION_RADIUS) {
+                    const unitX = dx / dist;
+                    const unitY = dy / dist;
+
+                    const force = (REPULSION_RADIUS - dist) * REPULSION_STRENGTH;
+
+                    const translateX = unitX * force;
+                    const translateY = unitY * force;
+                    
+                    contractIcon.style.transform = `translate(${translateX}px, ${translateY}px)`;
+                } else {
+                    if (contractIcon.style.transform !== 'none') {
+                        contractIcon.style.transform = 'none';
+                    }
+                }
+            });
+
+            headerBar.addEventListener('mouseleave', () => {
+                contractIcon.style.transform = 'none';
+            });
+        }
+        
+        // --- Helper Functions for Item State (Retaining approved grey-out logic) ---
+        
+        function disableSourceItem(itemId) {
+            const item = document.getElementById(itemId);
+            if (item) {
+                item.classList.add('bg-tint-5', 'text-tint-3');
+                item.classList.remove('bg-white', 'text-primary-dark', 'draggable-item');
+                item.removeAttribute('draggable');
+                item.style.cursor = 'default';
+                item.classList.remove('clicked'); 
+            }
+        }
+
+        function enableSourceItem(itemId) {
+            const item = document.getElementById(itemId);
+            if (item) {
+                item.classList.remove('bg-tint-5', 'text-tint-3');
+                item.classList.add('bg-white', 'text-primary-dark', 'draggable-item');
+                item.setAttribute('draggable', 'true');
+                item.style.cursor = 'grab';
+            }
+        }
+        
+        function resetAll() {
+            // 1. Get all dropped items (excluding placeholder)
+            const droppedItems = Array.from(dropZone.querySelectorAll('[data-original-id]'));
+
+            // 2. Iterate and re-enable source items
+            droppedItems.forEach(item => {
+                enableSourceItem(item.dataset.originalId);
+                item.parentNode.removeChild(item);
+            });
+
+            // 3. Show placeholder
+            if (placeholder) {
+                placeholder.classList.remove('hidden');
+            }
+
+            // 4. Hide any open modals
+            hideModal(resultModal);
+            hideModal(bookingMethodModal);
+            hideModal(intrinsicCheckModal);
+        }
+
+        // --- Drag and Drop Logic ---
+        
+        draggablesList.forEach(item => {
+            
+            item.addEventListener('click', (e) => {
+                if (e.target.getAttribute('draggable') === 'true') {
+                     e.target.classList.toggle('clicked');
+                }
+            });
+
+            item.addEventListener('dragstart', (e) => {
+                if (e.target.getAttribute('draggable') !== 'true') {
+                    e.preventDefault();
+                    return;
+                }
+                e.dataTransfer.setData('text/original_id', e.target.id);
+                e.target.classList.add('opacity-50', 'shadow-2xl');
+                e.dataTransfer.setDragImage(e.target, e.target.offsetWidth / 2, e.target.offsetHeight / 2);
+            });
+
+            item.addEventListener('dragend', (e) => {
+                e.target.classList.remove('opacity-50', 'shadow-2xl');
+            });
+        });
+
+        // Drop Zone DragOver/DragLeave handlers
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault(); 
+            dropZone.classList.add('bg-tint-3', 'border-solid');
+            if (placeholder) {
+                placeholder.classList.add('opacity-0');
+            }
+        });
+        
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('bg-tint-3', 'border-solid');
+            if (placeholder) {
+                placeholder.classList.remove('opacity-0');
+            }
+        });
+
+        // Drop Handler - Applies Disabling/Enabling Logic
+        function isDropZoneEmpty() {
+            // Check children of the scrollable drop zone, excluding the placeholder
+            return Array.from(dropZone.children).filter(c => c.id !== 'drop-zone-placeholder').length === 0;
+        }
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('bg-tint-3', 'border-solid');
+            
+            const originalId = e.dataTransfer.getData('text/original_id');
+            const draggedElement = document.getElementById(originalId);
+            
+            if (!draggedElement || draggedElement.getAttribute('draggable') !== 'true') {
+                return;
+            }
+
+            simulateDrop(originalId);
+        });
+
+        // Wire the Analyse and Reset buttons
+        analyseButton.addEventListener('click', analyseArrangement);
+        resetAllButton.addEventListener('click', resetAll);
+
+        // Modal Close Listeners
+        modalCloseButton.addEventListener('click', () => hideModal(resultModal));
+        methodModalCloseButton.addEventListener('click', () => hideModal(bookingMethodModal));
+        
+        // Intrinsic Check Modal Listeners
+        intrinsicCheckYes.addEventListener('click', () => {
+            hideModal(intrinsicCheckModal);
+            runFinalAnalysis(true); // Treat accommodation as intrinsic (ignore it)
+        });
+        intrinsicCheckNo.addEventListener('click', () => {
+            hideModal(intrinsicCheckModal);
+            runFinalAnalysis(false); // Treat accommodation as normal
+        });
+        
+        // Close modals if user clicks the dark backdrop
+        resultModal.addEventListener('click', (e) => {
+            if (e.target === resultModal) {
+                hideModal(resultModal);
+            }
+        });
+        bookingMethodModal.addEventListener('click', (e) => {
+            if (e.target === bookingMethodModal) {
+                hideModal(bookingMethodModal);
+            }
+        });
+        intrinsicCheckModal.addEventListener('click', (e) => {
+             if (e.target === intrinsicCheckModal) {
+                hideModal(intrinsicCheckModal);
+            }
+        });
+
+        // Initialize the icon interaction
+        document.addEventListener('DOMContentLoaded', () => {
+            setupIconInteraction();
+        });
+    </script>
+
+</body>
+</html>
