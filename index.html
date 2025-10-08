@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Travel Arrangement Identifier</title>
-    <!-- Load Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Load Open Sans Font -->
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&display=swap" rel="stylesheet">
     
     <script>
@@ -74,6 +72,13 @@
             background-color: rgba(0, 75, 136, 0.9); /* primary-dark 90% transparent */
             z-index: 50; /* Ensure it is on top of everything */
         }
+        
+        /* NEW: Styles for the Initial Warning Modal */
+        #warning-modal .modal-select-item {
+            cursor: pointer;
+            transition: background-color 0.1s, color 0.1s;
+        }
+
 
         /* Modal Toggle Button Styling */
         .modal-select-item {
@@ -94,43 +99,41 @@
         .shadow-blue {
             box-shadow: 0 4px 6px -1px rgba(0, 75, 136, 0.4), 0 2px 4px -2px rgba(0, 75, 136, 0.4); /* Primary Dark (Blue) soft shadow */
         }
+        /* Custom style for the large brain emoji in the modal */
+        .brain-icon-size {
+            font-size: 6rem; /* Make the emoji large to substitute the image */
+            line-height: 1;
+            display: block;
+            margin: 0 auto 1rem;
+        }
     </style>
 </head>
 <body class="flex flex-col py-2">
 
-    <!-- Header Section -->
     <header id="header-bar" class="w-full max-w-5xl mx-auto bg-primary-dark p-6 md:p-8 mb-4 shadow-2xl square-corner flex-shrink-0 relative z-10">
         <div class="flex justify-between items-center">
-            <!-- Left Aligned Text -->
             <div class="text-left">
                 <h1 class="text-3xl md:text-4xl font-bold text-white leading-tight">
                     Travel arrangement identifer
                 </h1>
                 <p class="mt-2 text-base text-tint-4">Use this tool to identify what sort of holiday contract has been formed: a package holiday, linked travel arrangement, or independent travel</p>
             </div>
-            <!-- Right Aligned Interactive Icon: Plane escaping the rain -->
             <div class="hidden sm:block">
                 <span id="contract-icon" class="magnify-icon">✈️</span>
             </div>
         </div>
     </header>
 
-    <!-- Main Content Area -->
     <div class="px-4 flex items-start justify-center pb-8">
-        <!-- Main Application Container -->
         <div class="w-full max-w-5xl bg-white border-4 border-primary-dark shadow-2xl square-corner flex flex-col">
 
-            <!-- Main Content Grid -->
             <div class="flex flex-col lg:flex-row divide-y-4 lg:divide-x-4 lg:divide-y-0 divide-primary-dark">
                 
-                <!-- Left Source Area: Booking Method & Holiday Elements -->
                 <div class="lg:w-1/2 flex flex-col md:flex-row divide-x-0 md:divide-x-4 divide-primary-dark">
                     
-                    <!-- Column 1: Booking Method -->
                     <div class="w-full md:w-1/2 p-4 bg-tint-5 flex flex-col">
                         <h2 class="text-xl font-bold text-primary-dark mb-4 border-b border-tint-3 pb-2 flex-shrink-0">Booking method</h2>
                         <div id="booking-methods" class="space-y-2 overflow-y-auto pr-2 h-[30rem]">
-                            <!-- Draggable Items -->
                             <div draggable="true" id="method-1" class="draggable-item p-2 bg-white text-primary-dark border border-tint-3 shadow-sm square-corner" data-type="package">🗂️ Pre-arranged into a single contract</div>
                             <div draggable="true" id="method-2" class="draggable-item p-2 bg-white text-primary-dark border border-tint-3 shadow-sm square-corner" data-type="package">🛒 Purchased from a single point of sale</div>
                             <div draggable="true" id="method-3" class="draggable-item p-2 bg-white text-primary-dark border border-tint-3 shadow-sm square-corner" data-type="package">💰 Offered at an inclusive or total price</div>
@@ -143,11 +146,9 @@
                         </div>
                     </div>
 
-                    <!-- Column 2: Holiday Elements -->
                     <div class="w-full md:w-1/2 p-4 bg-tint-5 border-t-4 md:border-t-0 border-primary-dark flex flex-col">
                         <h2 class="text-xl font-bold text-primary-dark mb-4 border-b border-tint-3 pb-2 flex-shrink-0">Holiday elements</h2>
                         <div id="holiday-elements" class="space-y-2 overflow-y-auto pr-2 h-[30rem]">
-                            <!-- Draggable Items - Grouped by Category -->
                             <div draggable="true" id="element-1" class="draggable-item p-2 bg-white text-primary-dark border border-tint-3 shadow-sm square-corner" data-category="transport">🛫 Flights</div>
                             <div draggable="true" id="element-2" class="draggable-item p-2 bg-white text-primary-dark border border-tint-3 shadow-sm square-corner" data-category="transport">🚆 Trains</div>
                             <div draggable="true" id="element-3" class="draggable-item p-2 bg-white text-primary-dark border border-tint-3 shadow-sm square-corner" data-category="transport">🚌 Coaches</div>
@@ -163,43 +164,32 @@
                     </div>
                 </div>
 
-                <!-- Right Target Area: Drop Zone -->
                 <div class="lg:w-1/2 p-4 bg-tint-5 flex flex-col">
                     <h2 class="text-xl font-bold text-primary-dark mb-4 border-b border-highlight pb-2 flex justify-between items-center flex-shrink-0">
                         Your travel arrangement 
-                        <!-- Button Group: Reset and Analyse -->
                         <div class="flex space-x-2">
                              <button id="reset-all-button" class="bg-tint-4 text-primary-dark text-sm px-3 py-1 hover:bg-tint-3 square-corner shadow-blue transition flex items-center justify-center space-x-1">
                                 <span>↺</span><span>Reset all</span>
                             </button>
-                            <!-- Updated Analyse button classes -->
                             <button id="analyse-button" class="bg-primary-dark text-white text-sm px-3 py-1 hover:bg-highlight hover:text-primary-dark square-corner shadow-highlight transition flex items-center justify-center space-x-1">
                                 <span>🔍︎</span><span>Analyse</span>
                             </button>
                         </div>
                     </h2>
-                    <!-- Drop Zone container - This is the single scrollable element now -->
                     <div id="drop-zone" class="drop-zone min-h-32 p-4 border-4 border-dashed border-tint-3 text-center text-tint-1 text-lg flex flex-col space-y-2 overflow-y-auto h-[30rem]">
                         <p id="drop-zone-placeholder" class="py-12">drag booking method(s) and holiday element(s) from the left and drop them here</p>
-                        <!-- Dropped items will appear here -->
-                    </div>
+                        </div>
                 </div>
             </div>
         </div>
     </div>
     
-    <!-- Footer Attribution -->
     <footer class="w-full max-w-5xl mx-auto p-4 text-tint-1 flex justify-between items-center text-xs flex-shrink-0">
-        <!-- Logo (Left-aligned, size h-12) -->
         <img src="https://cacv.org.uk/wp-content/uploads/cacv-logo.svg" alt="Citizens Advice Cardiff & Vale Logo" class="h-12">
         
-        <!-- Text (Right-aligned) -->
         <p class="text-right">This tool was created by <a href="mailto:dafydd.young@consumer.advice.org.uk" class="text-primary-dark font-semibold hover:text-tint-1">Dafydd</a> at Citizens Advice Cardiff & Vale. Use at your own risk, and if in doubt check <a href="https://docs.google.com/presentation/d/1bLMtEq_Hko38_jHlyuPTbBpIPPi8OoctlGwqs8_0pkU/edit?usp=sharing" target="_blank" class="text-primary-dark font-semibold hover:text-tint-1">the PTRs slideshow</a>.</p>
     </footer>
 
-    <!-- MODAL STRUCTURES -->
-
-    <!-- 1. Analysis Result Modal -->
     <div id="result-modal" class="fixed inset-0 modal-backdrop hidden justify-center items-center">
         <div id="modal-content-area" class="w-11/12 md:w-1/2 bg-white p-8 shadow-2xl square-corner border-t-8 border-highlight">
             <h2 id="modal-title" class="text-3xl font-bold text-primary-dark mb-4"></h2>
@@ -210,15 +200,13 @@
         </div>
     </div>
     
-    <!-- 2. Booking Method Warning Modal (Updated for multi-select) -->
     <div id="booking-method-modal" class="fixed inset-0 modal-backdrop hidden justify-center items-center z-50">
         <div class="w-11/12 md:w-3/5 lg:w-1/2 bg-white p-8 shadow-2xl square-corner border-t-8 border-highlight">
             <h2 class="text-2xl font-bold text-primary-dark mb-4">You must choose at least one booking method</h2>
             <p class="text-lg text-primary-dark mb-6">Please select one or more booking methods below.</p>
             
             <div id="modal-booking-method-list" class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-80 overflow-y-auto pr-2">
-                <!-- Booking method options will be populated here -->
-            </div>
+                </div>
 
             <div class="flex justify-end space-x-4 mt-6">
                 <button id="method-modal-cancel-button" class="bg-tint-4 text-primary-dark text-lg px-6 py-2 hover:bg-tint-3 square-corner">
@@ -231,15 +219,13 @@
         </div>
     </div>
     
-    <!-- 3. Holiday Element Warning Modal (NEW) -->
     <div id="holiday-element-modal" class="fixed inset-0 modal-backdrop hidden justify-center items-center z-50">
         <div class="w-11/12 md:w-3/5 lg:w-1/2 bg-white p-8 shadow-2xl square-corner border-t-8 border-highlight">
             <h2 class="text-2xl font-bold text-primary-dark mb-4">You must choose at least one holiday element</h2>
             <p class="text-lg text-primary-dark mb-6">Please select one or more holiday elements below.</p>
             
             <div id="modal-holiday-element-list" class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-80 overflow-y-auto pr-2">
-                <!-- Holiday element options will be populated here -->
-            </div>
+                </div>
 
             <div class="flex justify-end space-x-4 mt-6">
                 <button id="element-modal-cancel-button" class="bg-tint-4 text-primary-dark text-lg px-6 py-2 hover:bg-tint-3 square-corner">
@@ -252,7 +238,6 @@
         </div>
     </div>
     
-    <!-- 4. Intrinsic Check Modal -->
     <div id="intrinsic-check-modal" class="fixed inset-0 modal-backdrop hidden justify-center items-center z-50">
         <div class="w-11/12 md:w-1/2 bg-white p-8 shadow-2xl square-corner border-t-8 border-highlight">
             <h2 class="text-2xl font-bold text-primary-dark mb-4">Intrinsic service check</h2>
@@ -264,6 +249,27 @@
                 </button>
                 <button id="intrinsic-check-no" class="bg-primary-dark text-white text-lg px-6 py-2 hover:bg-tint-1 square-corner">
                     No (It was separate accommodation)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    
+    <div id="warning-modal" class="fixed inset-0 z-50 bg-primary-dark/90 flex items-center justify-center p-4">
+        <div class="bg-white p-8 max-w-lg w-full square-corner border-4 border-highlight shadow-2xl space-y-6">
+            <div class="text-center">
+                <span class="brain-icon-size">🧠</span> 
+                <h3 class="text-xl font-bold text-primary-dark">Warning: Experimental Tool</h3>
+            </div>
+            <p class="text-lg text-center text-primary-dark">
+                This tool is experimental. It might give you the wrong answer, and is no substitute for using your brain.
+            </p>
+            <div class="flex flex-col space-y-3">
+                <button id="warning-modal-understand" class="bg-highlight hover:bg-tint-1 text-primary-dark hover:text-white text-base font-bold p-3 square-corner transition-colors duration-200">
+                    I understand
+                </button>
+                <button id="warning-modal-cancel" class="bg-tint-5 border border-tint-4 text-primary-dark text-base font-bold p-3 square-corner transition-colors duration-200 hover:bg-tint-4">
+                    Actually, I'd rather not
                 </button>
             </div>
         </div>
@@ -301,6 +307,12 @@
         const intrinsicCheckNo = document.getElementById('intrinsic-check-no');
 
         const resetAllButton = document.getElementById('reset-all-button'); 
+
+        // NEW: Warning Modal References
+        const warningModal = document.getElementById('warning-modal');
+        const warningModalUnderstand = document.getElementById('warning-modal-understand');
+        const warningModalCancel = document.getElementById('warning-modal-cancel');
+
 
         // --- Result Definitions ---
         const ARRANGEMENT_DEFINITIONS = {
@@ -768,10 +780,21 @@
 
         // Modal Close Listeners
         modalCloseButton.addEventListener('click', () => hideModal(resultModal));
+
+        // NEW: Warning Modal Listeners
+        warningModalUnderstand.addEventListener('click', () => {
+            hideModal(warningModal);
+        });
+
+        warningModalCancel.addEventListener('click', () => {
+            window.location.href = 'https://docs.google.com/spreadsheets/d/1Ghs2JKcALm6wzgV0UvMi1zRY38pYIdVcM8Qb6sPUGtU/edit?usp=sharing';
+        });
         
         // Initialize the icon interaction
         document.addEventListener('DOMContentLoaded', () => {
             setupIconInteraction();
+            // The warning modal is shown by default via its classes in the HTML. 
+            // We just ensure it's functional.
         });
     </script>
 
